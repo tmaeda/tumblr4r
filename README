@@ -1,0 +1,48 @@
+= tumblr4r
+
+* http://github.com/tmaeda/tumblr4r
+
+== Description
+
+Tumblr API wrapper for Ruby.
+
+== Synopsis
+
+Finding by conditions.
+  require 'rubygems'
+  require 'tumblr4r'
+
+  site_a = Tumblr4r::Site.new("site_a.tumblr.com")
+  posts = site_a.find(:all)
+  quote_posts = site_a.find(:all, :type => "quote")
+  posts_offset_and_limit = site_a.find(:all, :offset => 50, :limit => 20)
+  quote_search = site_a.find(:all, :type => "quote", :search => "foo")
+  quote_tagged = site_a.find(:all, :type => "quote", :tagged => "bar")
+
+Finding by id.
+  post = site_a.find(12345678)
+
+Posting.
+  site_b = Tumblr4r::Site.new("site_b.tumblr.com", "foo@example.com", "password")
+  site_b.save(post[0])
+
+Deleting.
+  site_b.delete(post[0].post_id)
+
+== Installation
+
+  gem install tumblr4r
+
+== Problems
+
+* Can't get private posts yet.
+* Can't upload audio and video data yet.
+* Can't handle feeds yet.
+
+
+== Copyright
+
+Author::    Tomoki MAEDA <http://twitter.com/tmaeda>
+Copyright:: Copyright (c) 2009 Tomoki MAEDA
+License::   Ruby's license
+
