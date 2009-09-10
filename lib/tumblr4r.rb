@@ -150,6 +150,11 @@ module Tumblr4r
       return new_post
     end
 
+    # @param [Integer] post_id
+    def delete(post_id)
+      return @conn.delete(post_id)
+    end
+
   end
 
   # Postおよびその子クラスは原則として単なるData Transfer Objectとし、
