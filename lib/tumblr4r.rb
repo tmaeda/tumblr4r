@@ -364,7 +364,7 @@ module Tumblr4r
       end
     end
 
-    # @params [Integer] post_id
+    # @param [Integer] post_id
     def delete(post_id)
       raise TumblrError.new("email or password is invalid") unless authenticated
       response = nil
