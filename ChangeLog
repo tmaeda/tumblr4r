@@ -1,3 +1,8 @@
+== 0.7.1 / 2009-09-11
+* fix: missing Site#delete 
+* fix: the number of the records is wrong when finding with :limit and :offset options.
+
+	
 == 0.7.0 / 2009-09-09
 
 * initial release
