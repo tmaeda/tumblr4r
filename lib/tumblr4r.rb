@@ -78,7 +78,7 @@ module Tumblr4r
         total = self.count(options)
         if options[:limit]
           goal = [total - params[:start],
-                  options[:limit] - params[:start]].min
+                  options[:limit]].min
         else
           goal = total - params[:start]
         end

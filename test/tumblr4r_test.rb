@@ -22,7 +22,6 @@ class Tumblr4rTest < Test::Unit::TestCase
   def teardown
   end
 
-
   def test_initialize
     assert_equal READ_TEST_HOST, @site.hostname
     assert_nil @site.email
@@ -84,6 +83,11 @@ class Tumblr4rTest < Test::Unit::TestCase
   def test_find_all_with_offset
     posts = @large_site.find(:all, :offset => 12)
     assert_equal TOTAL_COUNT-12, posts.size
+  end
+
+  def test_find_all_with_limit_and_offset
+    posts = @large_site.find(:all, :offset => 1, :limit => 2)
+    assert_equal 2, posts.size
   end
 
   # 実際に存在するよりも多いoffsetを指定した場合
