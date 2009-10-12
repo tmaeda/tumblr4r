@@ -207,7 +207,7 @@ module Tumblr4r
   end
 
   class Photo < Post
-    attr_accessor :photo_caption, :photo_link_url, :photo_url
+    attr_accessor :photo_caption, :photo_link_url, :photo_url, :photoset
     #TODO: photo_url の max-width って何？
     attr_accessor :data
 
@@ -219,6 +219,7 @@ module Tumblr4r
                    {"source" => @photo_url,
                      "caption" => @photo_caption,
                      "click-through-url" => @photo_link_url,
+                     "photoset" => @photoset,
                      "data" => @data})
     end
   end
@@ -469,6 +470,10 @@ module Tumblr4r
       post.photo_caption = rexml_post.elements["photo-caption"].try(:text) || ""
       post.photo_link_url = rexml_post.elements["photo-link-url"].try(:text) || ""
       post.photo_url = rexml_post.elements["photo-url"].try(:text) || ""
+      post.photoset = []
+      rexml_post.elements.each("photoset/photo") do |photo|
+        post.photoset.push(photo.elements["photo-url"].try(:text) || "")
+      end
       post
     end
 
