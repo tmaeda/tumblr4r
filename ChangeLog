@@ -1,3 +1,7 @@
+== 0.7.2 / 2009-10-15
+* new: photoset support added.(Thanks to http://github.com/smajda for the patch.)
+
+
 == 0.7.1 / 2009-09-11
 * fix: missing Site#delete 
 * fix: the number of the records is wrong when finding with :limit and :offset options.

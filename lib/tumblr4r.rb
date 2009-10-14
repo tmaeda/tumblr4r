@@ -5,7 +5,7 @@ require 'active_support'
 require 'logger'
 require 'cgi'
 module Tumblr4r
-  VERSION = '0.7.1'
+  VERSION = '0.7.2'
   class TumblrError < StandardError
   end
 

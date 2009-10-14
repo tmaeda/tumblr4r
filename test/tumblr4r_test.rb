@@ -54,8 +54,8 @@ class Tumblr4rTest < Test::Unit::TestCase
 
   def test_find
     posts = @site.find(:all)
-    assert_equal 8, posts.size
-    assert_equal Video, posts[0].class
+    assert_equal 9, posts.size
+    assert_equal Photo, posts[0].class
   end
 
   def test_find_all
@@ -149,22 +149,46 @@ EOF
 
   def test_find_with_type_photo
     posts = @site.find(:all, :type => "photo")
-    assert_equal 1, posts.size
+    assert_equal 2, posts.size
+
+    # normal
+    assert_equal Photo, posts[1].class
+    assert_equal 123461063, posts[1].post_id
+    assert_equal "http://tumblr4rtest.tumblr.com/post/123461063", posts[1].url
+    assert_equal "http://tumblr4rtest.tumblr.com/post/123461063/photo", posts[1].url_with_slug
+    assert_equal "photo", posts[1].type
+    assert_equal "2009-06-14 16:34:50 GMT", posts[1].date_gmt
+    assert_equal "Mon, 15 Jun 2009 01:34:50", posts[1].date
+    assert_equal 1244997290, posts[1].unix_timestamp
+    assert_equal "html", posts[1].format
+    assert_equal ["test", "photo"], posts[1].tags
+    assert_equal false, posts[1].bookmarklet
+
+    assert_equal "<p>Photoのテストです。</p>\n\n<p>ギコです。</p>", posts[1].photo_caption
+    assert_equal "http://www.google.co.jp/", posts[1].photo_link_url
+    assert_equal "http://5.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[1].photo_url
+    assert_equal [], posts[1].photoset
+
+    # photoset
     assert_equal Photo, posts[0].class
-    assert_equal 123461063, posts[0].post_id
-    assert_equal "http://tumblr4rtest.tumblr.com/post/123461063", posts[0].url
-    assert_equal "http://tumblr4rtest.tumblr.com/post/123461063/photo", posts[0].url_with_slug
+    assert_equal 211868268, posts[0].post_id
+    assert_equal "http://tumblr4rtest.tumblr.com/post/211868268", posts[0].url
+    assert_equal "http://tumblr4rtest.tumblr.com/post/211868268/photoset-test", posts[0].url_with_slug
     assert_equal "photo", posts[0].type
-    assert_equal "2009-06-14 16:34:50 GMT", posts[0].date_gmt
-    assert_equal "Mon, 15 Jun 2009 01:34:50", posts[0].date
-    assert_equal 1244997290, posts[0].unix_timestamp
+    assert_equal "2009-10-13 10:19:04 GMT", posts[0].date_gmt
+    assert_equal "Tue, 13 Oct 2009 19:19:04", posts[0].date
+    assert_equal 1255429144, posts[0].unix_timestamp
     assert_equal "html", posts[0].format
-    assert_equal ["test", "photo"], posts[0].tags
+    assert_equal [], posts[0].tags
     assert_equal false, posts[0].bookmarklet
 
-    assert_equal "<p>Photoのテストです。</p>\n\n<p>ギコです。</p>", posts[0].photo_caption
-    assert_equal "http://www.google.co.jp/", posts[0].photo_link_url
-    assert_equal "http://5.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[0].photo_url
+    assert_equal "Photoset test.", posts[0].photo_caption
+    assert_equal "", posts[0].photo_link_url
+    assert_equal "http://22.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg", posts[0].photo_url
+    assert_equal ["http://22.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg",
+                 "http://6.media.tumblr.com/tumblr_krg7btBOD21qzfaavo2_500.jpg",
+                 "http://16.media.tumblr.com/tumblr_krg7btBOD21qzfaavo3_500.png"], posts[0].photoset
+
   end
 
   def test_find_with_type_quote
