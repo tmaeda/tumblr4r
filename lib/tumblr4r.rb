@@ -7,10 +7,10 @@ require 'cgi'
 module Tumblr4r
   VERSION = '0.7.2'
   class TumblrError < StandardError
-    attr_accessor :parent
-    def initialize(msg, parent=nil)
+    attr_accessor :attachment
+    def initialize(msg, attachment=nil)
       super(msg)
-      @parent = parent
+      @attachment = attachment
     end
   end
 
@@ -128,7 +128,7 @@ module Tumblr4r
         @logger.info("total: #{total}")
         return posts[0]
       else
-        raise ArgumentError
+        raise ArgumentError.new("id_or_type must be :all or Integer, but was #{id_or_type}(<#{id_or_type.class}>)")
       end
     end
 
@@ -155,8 +155,17 @@ module Tumblr4r
       return new_post
     end
 
-    # @param [Integer] post_id
-    def delete(post_id)
+    # @param [Integer|Post] post_id_or_post
+    def delete(post_id_or_post)
+      post_id = nil
+      case post_id_or_post
+      when Tumblr4r::Post
+        post_id = post_id_or_post.post_id
+      when Integer
+        post_id = post_id_or_post
+      else
+        raise ArgumentError.new("post_id_or_post must be Tumblr4r::Post or Integer, but was #{post_id_or_post}(<#{post_id_or_post.class}>)")
+      end
       return @conn.delete(post_id)
     end
 
