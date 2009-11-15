@@ -293,7 +293,7 @@ module Tumblr4r
       when Net::HTTP
         @conn = http_or_hostname
       else
-        raise ArgumentError.new("http_or_hostname must be String or Net::HTTP")
+        raise ArgumentError.new("http_or_hostname must be String or Net::HTTP but is #{http_or_hostname.class}")
       end
       @email= email
       @password = password
