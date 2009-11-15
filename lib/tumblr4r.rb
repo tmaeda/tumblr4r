@@ -7,6 +7,11 @@ require 'cgi'
 module Tumblr4r
   VERSION = '0.7.2'
   class TumblrError < StandardError
+    attr_accessor :parent
+    def initialize(msg, parent=nil)
+      super(msg)
+      @parent = parent
+    end
   end
 
   module POST_TYPE
@@ -321,9 +326,9 @@ module Tumblr4r
       when Net::HTTPOK
         return res.body
       when Net::HTTPNotFound
-        raise TumblrError.new("no such site(#{@hostname})")
+        raise TumblrError.new("no such site(#{@hostname})", res)
       else
-        raise TumblrError.new("unexpected response #{res.inspect}")
+        raise TumblrError.new("unexpected response #{res.inspect}", res)
       end
     end
 
@@ -339,7 +344,7 @@ module Tumblr4r
       when Net::HTTPOK
         return true
       else
-        raise TumblrError.new(response.inspect + "\n" + response.body)
+        raise TumblrError.new(format_error(response), response)
       end
     end
 
@@ -358,10 +363,7 @@ module Tumblr4r
       when Net::HTTPSuccess
         return response.body.to_i
       else
-        msg = response.inspect + "\n"
-        response.each{|k,v| msg += "#{k}: #{v}\n"}
-        msg += response.body
-        raise TumblrError.new(msg)
+        raise TumblrError.new(format_error(response), response)
       end
     end
 
@@ -379,11 +381,15 @@ module Tumblr4r
         logger.debug("#### response: #{response.code}: #{response.body}")
         return true
       else
-        msg = response.inspect + "\n"
-        response.each{|k,v| msg += "#{k}: #{v}\n"}
-        msg += response.body
-        raise TumblrError.new(msg)
+        raise TumblrError.new(format_error(response), response)
       end
+    end
+
+    def format_error(http_response)
+      msg = response.inspect + "\n"
+      response.each{|k,v| msg += "#{k}: #{v}\n"}
+      msg += response.body
+      msg
     end
   end
 
