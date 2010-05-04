@@ -394,7 +394,7 @@ module Tumblr4r
       end
     end
 
-    def format_error(http_response)
+    def format_error(response)
       msg = response.inspect + "\n"
       response.each{|k,v| msg += "#{k}: #{v}\n"}
       msg += response.body
