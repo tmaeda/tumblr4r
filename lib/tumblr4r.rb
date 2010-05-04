@@ -67,6 +67,7 @@ module Tumblr4r
     # TODO: ここの再帰取得ロジックはTumblrAPIとは独立してるので
     # TumblrAPIとは独立した形に切り出したり、TumblrAPIとは切り離してテストを書きたいものだ
     # @param [Symbol|Integer] id_or_type :all, id
+    # @param [Hash] options :offset, :limit, :type, :filter, :tagged, :search,
     # @return [Array<Post>|Post]
     def find(id_or_type, options = { })
       params = { }
@@ -88,12 +89,9 @@ module Tumblr4r
           goal = total - params[:start]
         end
         # 取得件数の初期化
-        if goal < 0
+        params[:num] = [goal, API_READ_LIMIT].min # :num を指定しないとデフォルトでは20件しかとれない
+        if params[:num] < 0
           return result
-        elsif goal < API_READ_LIMIT
-          params[:num] = goal
-        else
-          params[:num] = API_READ_LIMIT # :num を指定しないとデフォルトでは20件しかとれない
         end
 
         loop do
@@ -113,11 +111,7 @@ module Tumblr4r
           # 取得開始位置の調整
           params[:start] += params[:num]
           # 取得件数の調整
-          if (goal - result.size) >= API_READ_LIMIT
-            params[:num] = API_READ_LIMIT
-          else
-            params[:num] = goal - result.size
-          end
+          params[:num] = [goal - result.size, API_READ_LIMIT].min
         end
         return result
       elsif id_or_type.kind_of?(Integer)
