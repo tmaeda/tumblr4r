@@ -144,7 +144,7 @@ EOF
     assert_equal false, posts[1].bookmarklet
 
     assert_equal "", posts[1].regular_title
-    assert_equal "Tumblr4rのテストです", posts[1].regular_body
+    assert_equal "<p>Tumblr4rのテストです</p>", posts[1].regular_body
   end
 
   def test_find_with_type_photo
@@ -229,7 +229,7 @@ EOF
 
     assert_equal "たんぶらー", posts[0].link_text
     assert_equal "http://www.tumblr.com/", posts[0].link_url
-    assert_equal "ですくりぷしょん", posts[0].link_description
+    assert_equal "<p>ですくりぷしょん</p>", posts[0].link_description
   end
 
   def test_find_with_type_conversation
@@ -274,7 +274,7 @@ EOF
     assert_equal false, posts[0].bookmarklet
 
     assert_equal true, posts[0].audio_plays
-    assert_equal "tumblr4r miku", posts[0].audio_caption
+    assert_equal "<p>tumblr4r miku</p>", posts[0].audio_caption
     assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://tumblr4rtest.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
   end
 
@@ -293,7 +293,7 @@ EOF
     assert_equal [], posts[0].tags
     assert_equal false, posts[0].bookmarklet
 
-    assert_equal "matrix sappoloaded", posts[0].video_caption
+    assert_equal "<p>matrix sappoloaded</p>", posts[0].video_caption
     assert_equal "http://www.youtube.com/watch?v=FavWH5RhYpw", posts[0].video_source
     assert_equal "<object width=\"400\" height=\"336\"><param name=\"movie\" value=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\"></param><param name=\"wmode\" value=\"transparent\"></param><param name=\"allowFullScreen\" value=\"true\"></param><embed src=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\" type=\"application/x-shockwave-flash\" width=\"400\" height=\"336\" allowFullScreen=\"true\" wmode=\"transparent\"></embed></object>", posts[0].video_player
   end
