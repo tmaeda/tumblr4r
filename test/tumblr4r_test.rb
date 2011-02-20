@@ -188,8 +188,8 @@ EOF
     assert_equal "", posts[0].photo_link_url
     assert_equal "http://25.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg", posts[0].photo_url
     assert_equal ["http://25.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg",
-                 "http://6.media.tumblr.com/tumblr_krg7btBOD21qzfaavo2_500.jpg",
-                 "http://16.media.tumblr.com/tumblr_krg7btBOD21qzfaavo3_500.png"], posts[0].photoset
+                 "http://30.media.tumblr.com/tumblr_krg7btBOD21qzfaavo2_500.jpg",
+                 "http://27.media.tumblr.com/tumblr_krg7btBOD21qzfaavo3_500.png"], posts[0].photoset
 
   end
 
