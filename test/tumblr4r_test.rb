@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require File.dirname(__FILE__) + '/test_helper.rb'
 require "test/unit"
 require 'pit'
@@ -53,6 +54,7 @@ class Tumblr4rTest < Test::Unit::TestCase
   end
 
   def test_find
+    debugger
     posts = @site.find(:all)
     assert_equal 9, posts.size
     assert_equal Photo, posts[0].class
@@ -166,7 +168,7 @@ EOF
 
     assert_equal "<p>Photoのテストです。</p>\n\n<p>ギコです。</p>", posts[1].photo_caption
     assert_equal "http://www.google.co.jp/", posts[1].photo_link_url
-    assert_equal "http://5.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[1].photo_url
+    assert_equal "http://28.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[1].photo_url
     assert_equal [], posts[1].photoset
 
     # photoset
@@ -182,10 +184,10 @@ EOF
     assert_equal [], posts[0].tags
     assert_equal false, posts[0].bookmarklet
 
-    assert_equal "Photoset test.", posts[0].photo_caption
+    assert_equal "<p>Photoset test.</p>", posts[0].photo_caption
     assert_equal "", posts[0].photo_link_url
-    assert_equal "http://22.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg", posts[0].photo_url
-    assert_equal ["http://22.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg",
+    assert_equal "http://25.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg", posts[0].photo_url
+    assert_equal ["http://25.media.tumblr.com/tumblr_krg7btBOD21qzfaavo1_250.jpg",
                  "http://6.media.tumblr.com/tumblr_krg7btBOD21qzfaavo2_500.jpg",
                  "http://16.media.tumblr.com/tumblr_krg7btBOD21qzfaavo3_500.png"], posts[0].photoset
 
@@ -275,7 +277,8 @@ EOF
 
     assert_equal true, posts[0].audio_plays
     assert_equal "<p>tumblr4r miku</p>", posts[0].audio_caption
-    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://tumblr4rtest.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
+#    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://tumblr4rtest.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
+    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://assets.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
   end
 
   def test_find_with_type_video
@@ -295,7 +298,7 @@ EOF
 
     assert_equal "<p>matrix sappoloaded</p>", posts[0].video_caption
     assert_equal "http://www.youtube.com/watch?v=FavWH5RhYpw", posts[0].video_source
-    assert_equal "<object width=\"400\" height=\"336\"><param name=\"movie\" value=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\"></param><param name=\"wmode\" value=\"transparent\"></param><param name=\"allowFullScreen\" value=\"true\"></param><embed src=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\" type=\"application/x-shockwave-flash\" width=\"400\" height=\"336\" allowFullScreen=\"true\" wmode=\"transparent\"></embed></object>", posts[0].video_player
+    assert_equal "<object width=\"400\" height=\"325\"><param name=\"movie\" value=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\"></param><param name=\"wmode\" value=\"transparent\"></param><param name=\"allowFullScreen\" value=\"true\"></param><embed src=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\" type=\"application/x-shockwave-flash\" width=\"400\" height=\"325\" allowFullScreen=\"true\" wmode=\"transparent\"></embed></object>", posts[0].video_player
   end
 
   def test_find_with_tagged
@@ -402,6 +405,5 @@ EOF
     videos = @site.find(:all, :type => Tumblr4r::POST_TYPE::VIDEO)
     post = @write_site.save(videos[0])
   end
-
 end
 

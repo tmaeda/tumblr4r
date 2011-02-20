@@ -1,9 +1,17 @@
+# -*- coding: utf-8 -*-
 require 'net/http'
 require 'rubygems'
 require 'rexml/document'
-require 'active_support'
+begin 
+  require 'active_support/core_ext' 
+  require 'active_support/core_ext' 
+rescue 
+  require 'activesupport' 
+end 
+
 require 'logger'
 require 'cgi'
+
 module Tumblr4r
   VERSION = '0.7.2'
   class TumblrError < StandardError
@@ -33,9 +41,9 @@ module Tumblr4r
     attr_accessor :hostname, :email, :password, :name, :timezone, :title, :cname,
     :description, :feeds
     attr_accessor :logger
-    # TODO: 変数名もうちょっと考える
-    API_READ_LIMIT = 50
-    @@default_log_level = Logger::INFO
+    API_READ_MAX_ALLOWED_COUNT = 50
+    SLEEP_SECONDS_FOR_EVERY_FETCH = 10.0 # API manual says "Requests are rate-limited to one every 10 seconds."
+    @@default_log_level = Logger::DEBUG
     cattr_accessor :default_log_level
 
     class << self
@@ -64,56 +72,12 @@ module Tumblr4r
       self.site_info
     end
 
-    # TODO: ここの再帰取得ロジックはTumblrAPIとは独立してるので
-    # TumblrAPIとは独立した形に切り出したり、TumblrAPIとは切り離してテストを書きたいものだ
     # @param [Symbol|Integer] id_or_type :all, id
     # @param [Hash] options :offset, :limit, :type, :filter, :tagged, :search,
     # @return [Array<Post>|Post]
     def find(id_or_type, options = { })
-      params = { }
-      return result if options[:offset] && options[:offset].to_i < 0
-      [:type, :filter, :tagged, :search].each do |option|
-        params[option] = options[option] if options[option]
-      end
-
       if id_or_type == :all
-        result = []
-        # 取得開始位置の初期化
-        params[:start] = options[:offset] || 0
-        # goal の設定
-        total = self.count(options)
-        if options[:limit]
-          goal = [total - params[:start],
-                  options[:limit]].min
-        else
-          goal = total - params[:start]
-        end
-        # 取得件数の初期化
-        params[:num] = [goal, API_READ_LIMIT].min # :num を指定しないとデフォルトでは20件しかとれない
-        if params[:num] < 0
-          return result
-        end
-
-        loop do
-          xml = @conn.get(params)
-          posts, start, total = @parser.posts(xml)
-          @logger.info("size: #{posts.size}")
-          @logger.info("start: #{start}")
-          @logger.info("total: #{total}")
-          result += posts
-          if result.size >= goal || posts.size == 0
-            # Tumblr API の total で得られる値は全く信用ならない。
-            # 検索条件を考慮した件数を返してくれない。
-            # (つまり、goalは信用ならない)ので、posts.sizeも終了判定に利用する。
-            # TODO: もしくは:numの値を足し合わせていって、それとgoalを比較する？
-            break
-          end
-          # 取得開始位置の調整
-          params[:start] += params[:num]
-          # 取得件数の調整
-          params[:num] = [goal - result.size, API_READ_LIMIT].min
-        end
-        return result
+        normal_find(options)
       elsif id_or_type.kind_of?(Integer)
         xml = @conn.get({:id => id_or_type})
         posts, start, total = @parser.posts(xml)
@@ -123,6 +87,112 @@ module Tumblr4r
         return posts[0]
       else
         raise ArgumentError.new("id_or_type must be :all or Integer, but was #{id_or_type}(<#{id_or_type.class}>)")
+      end
+    end
+
+    # TODO: ループごとに実行して欲しい処理をblockで渡せるようにするといいかも？
+    # そのブロック引数にエラー情報も渡してあげれば、エラーが起きたのならretryだな、みたいな
+    # 指示ができない、、、、かな
+    def normal_find(options)
+      limit = options[:limit] && options[:limit].to_i
+      offset = options[:offset].to_i
+      total = self.count(options)
+      result = []
+      params = { }
+      [:type, :filter, :tagged, :search].each do |option|
+        params[option] = options[option] if options[option]
+      end
+      last_fetched_at = nil
+      each_fetch(limit, offset, API_READ_MAX_ALLOWED_COUNT, total) do |offset, num|
+        params[:start] = offset
+        params[:num] = num
+        # APIマニュアルにはこっちのスリープ時間については明記されてないが、dashboardと同じ秒数SLEEPしとく
+        sleep_secs = last_fetched_at ? SLEEP_SECONDS_FOR_EVERY_FETCH - (Time.now - last_fetched_at) : 0
+        if sleep_secs > 0
+          logger.debug("sleeping #{sleep_secs} secs.")
+          sleep sleep_secs
+        end
+        xml = @conn.get(params)
+        last_fetched_at = Time.now
+        posts, start, total = @parser.posts(xml)
+        result += posts
+        if posts.size == 0
+          # Tumblr API の total で得られる値は全く信用ならない。
+          # 検索条件を考慮した件数を返してくれない。
+          # (つまり、goalは信用ならない)ので、posts.sizeも終了判定に利用する。
+          # TODO: もしくは:numの値を足し合わせていって、それとgoalを比較する？
+          break
+        end
+        posts.size
+      end
+      result
+    end
+
+    #, :search,
+    # @param [Hash] options :offset, :limit, :type, :filter
+    # @return [Array<Post>]
+    def dashboard(options = { })
+      limit = options[:limit] ? options[:limit].to_i : nil
+      offset = options[:offset].to_i
+      result = []
+      params = {:likes => "1" }
+      [:type, :filter].each do |option|
+        params[option] = options[option] if options[option]
+      end
+
+      total = 1000 # 明記されてないがたぶん1000件ぐらいが上限？
+      last_fetched_at = nil
+      each_fetch(limit, offset, API_READ_MAX_ALLOWED_COUNT, total) do |offset, num|
+        params[:start] = offset
+        params[:num] = num
+        sleep_secs = last_fetched_at ? SLEEP_SECONDS_FOR_EVERY_FETCH - (Time.now - last_fetched_at) : 0
+        if sleep_secs > 0
+          logger.debug("sleeping #{sleep_secs} secs.")
+          sleep sleep_secs
+        end
+        xml = @conn.dashboard(params)
+        last_fetched_at = Time.now
+        posts, start, total = @parser.posts(xml)
+        result += posts
+        if posts.size == 0
+          # Tumblr API の total で得られる値は全く信用ならない。
+          # 検索条件を考慮した件数を返してくれない。
+          # (つまり、goalは信用ならない)ので、posts.sizeも終了判定に利用する。
+          # TODO: もしくは:numの値を足し合わせていって、それとgoalを比較する？
+          break
+        end
+        posts.size
+      end
+      result
+    end
+
+    def each_fetch(limit, offset, max_at_once, total, &block)
+      return if offset && offset.to_i < 0
+
+      # 取得開始位置の初期化
+      start = offset || 0
+      if limit
+        goal = [total - start, limit].min
+      else
+        goal = total - start
+      end
+      # 取得件数の初期化
+      num = [goal, max_at_once].min
+      if num < 0
+        return
+      end
+
+      all_fetched = 0
+      while all_fetched < goal
+        fetched_count = yield(start, num)
+        @logger.info("size: #{fetched_count}")
+        @logger.info("start: #{start}")
+        @logger.info("total: #{total}")
+        all_fetched += fetched_count
+        # 取得開始位置の調整
+        start += num
+        # 取得件数の調整
+        num = [goal - fetched_count, max_at_once].min
       end
     end
 
@@ -180,6 +250,9 @@ module Tumblr4r
     :bookmarklet, # true|false
     :private, # Integer(0|1)
     :generator # String
+
+    attr_accessor :liked, # Boolean
+    :reblog_key # String
 
     @@default_generator = nil
     cattr_accessor :default_generator
@@ -335,6 +408,22 @@ module Tumblr4r
       end
     end
 
+    def dashboard(options = { })
+      response = nil
+      http = Net::HTTP.new("www.tumblr.com")
+      params = options.merge({"email" => @email, "password" => @password, "group" => @group})
+      query_string = params.delete_if{|k,v| v == nil }.map{|k,v| "#{k}=#{CGI.escape(v.to_s)}" unless v.nil?}.join("&")
+      logger.debug("#### query_string: #{query_string}")
+      response = http.post('/api/dashboard', query_string)
+      logger.debug(response.body)
+      case response
+      when Net::HTTPSuccess
+        return response.body
+      else
+        raise TumblrError.new(format_error(response), response)
+      end
+    end
+
     # @return true if email and password are valid
     # @raise TumblrError if email or password is invalid
     def authenticate
@@ -455,6 +544,8 @@ module Tumblr4r
       post.post_id = rexml_post.attributes["id"].to_i
       post.url = rexml_post.attributes["url"]
       post.url_with_slug = rexml_post.attributes["url-with-slug"]
+      post.liked = (rexml_post.attributes["liked"] == "true")
+      post.reblog_key = rexml_post.attributes["reblog-key"]
       post.type = rexml_post.attributes["type"]
       # TODO: time 関係の型をStringじゃなくTimeとかにする？
       post.date_gmt = rexml_post.attributes["date-gmt"]
