@@ -13,7 +13,7 @@ require 'logger'
 require 'cgi'
 
 module Tumblr4r
-  VERSION = '0.8.0'
+  VERSION = '0.8.1'
   class TumblrError < StandardError
     attr_accessor :attachment
     def initialize(msg, attachment=nil)
