@@ -30,6 +30,7 @@ module Tumblr4r
     CHAT = "conversation"
     AUDIO = "audio"
     VIDEO = "video"
+    ANSWER = "answer"
   end
 
   # ConnectionオブジェクトとParserオブジェクトを組み合わせて、
@@ -361,6 +362,14 @@ module Tumblr4r
                      "caption" => @video_caption})
     end
   end
+  
+  class Answer < Post
+    attr_accessor :answer, :question
+    
+    def params
+      super.merge!({"question" => @question, "answer" => @answer})
+    end
+  end
 
   # Tumblr XML API への薄いラッパー。
   # Rubyオブジェクトからの変換やRubyオブジェクトへの変換などは
@@ -529,6 +538,8 @@ module Tumblr4r
           post = self.audio(Audio.new, rexml_post)
         when POST_TYPE::VIDEO
           post = self.video(Video.new, rexml_post)
+        when POST_TYPE::ANSWER
+          post = self.answer(Answer.new, rexml_post)
         else
           raise TumblrError.new("unknown post type #{post_type}")
         end
@@ -612,6 +623,13 @@ module Tumblr4r
       post.video_caption = rexml_post.elements["video-caption"].try(:text) || ""
       post.video_source = rexml_post.elements["video-source"].try(:text) || ""
       post.video_player = rexml_post.elements["video-player"].try(:text) || ""
+      post
+    end
+    
+    def answer(post, rexml_post)
+      post = self.post(post, rexml_post)
+      post.question = rexml_post.elements["question"].try(:text) || ""
+      post.answer   = rexml_post.elements["answer"].try(:text) || ""
       post
     end
 
