@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+$LOAD_PATH << "."
 require File.dirname(__FILE__) + '/test_helper.rb'
 require "test/unit"
 require 'pit'
@@ -13,7 +14,7 @@ class Tumblr4rTest < Test::Unit::TestCase
     @site = Site.new(READ_TEST_HOST)
     writetest_conf = Pit.get("tumblr4rwritetest",
                              :require => {"email" => "required email",
-                             "password" => "required password"})
+                               "password" => "required password"})
     @write_site = Site.new(WRITE_TEST_HOST,
                            writetest_conf["email"],
                            writetest_conf["password"])
@@ -46,15 +47,11 @@ class Tumblr4rTest < Test::Unit::TestCase
     total = @large_site.count(:filter => "text")
     assert_equal TOTAL_COUNT, total
 
-    total = @large_site.count(:tagged => "test")
-    assert_equal TOTAL_COUNT, total
-
     total = @large_site.count(:search => "test")
     assert_equal TOTAL_COUNT, total
   end
 
   def test_find
-    debugger
     posts = @site.find(:all)
     assert_equal 9, posts.size
     assert_equal Photo, posts[0].class
@@ -120,15 +117,11 @@ class Tumblr4rTest < Test::Unit::TestCase
 <p><b>ボールドです。</b></p>
 <p><i>イタリックです。</i></p>
 <p><strike>取り消し線です。</strike></p>
-<ul>
-<li>unordered 1</li>
+<ul><li>unordered 1</li>
 <li>unordered 2</li>
-</ul>
-<ol>
-<li>ordered 1</li>
+</ul><ol><li>ordered 1</li>
 <li>ordered 2</li>
-</ol>
-<p>ここからインデント</p>
+</ol><p>ここからインデント</p>
 <blockquote style="margin: 0 0 0 40px; border: none; padding: 0px;">インデント開始<br/>ああああ<br/>インデント終了</blockquote>
 <p>ここまでインデント</p>
 EOF
@@ -168,7 +161,7 @@ EOF
 
     assert_equal "<p>Photoのテストです。</p>\n\n<p>ギコです。</p>", posts[1].photo_caption
     assert_equal "http://www.google.co.jp/", posts[1].photo_link_url
-    assert_equal "http://28.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[1].photo_url
+    assert_equal "http://31.media.tumblr.com/GyEYZujUYopiula4XKmXhCgmo1_250.jpg", posts[1].photo_url
     assert_equal [], posts[1].photoset
 
     # photoset
@@ -278,7 +271,7 @@ EOF
     assert_equal true, posts[0].audio_plays
     assert_equal "<p>tumblr4r miku</p>", posts[0].audio_caption
 #    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://tumblr4rtest.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
-    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://assets.tumblr.com/swf/audio_player.swf?audio_file=http://www.tumblr.com/audio_file/131705561/GyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\"></embed>", posts[0].audio_player
+    assert_equal "<embed type=\"application/x-shockwave-flash\" src=\"http://assets.tumblr.com/swf/audio_player.swf?audio_file=https%3A%2F%2Fwww.tumblr.com%2Faudio_file%2Ftumblr4rtest%2F131705561%2FGyEYZujUYp9df3nv1WMefTH8&color=FFFFFF\" height=\"27\" width=\"207\" quality=\"best\" wmode=\"opaque\"></embed>", posts[0].audio_player
   end
 
   def test_find_with_type_video
@@ -298,7 +291,7 @@ EOF
 
     assert_equal "<p>matrix sappoloaded</p>", posts[0].video_caption
     assert_equal "http://www.youtube.com/watch?v=FavWH5RhYpw", posts[0].video_source
-    assert_equal "<object width=\"400\" height=\"325\"><param name=\"movie\" value=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\"></param><param name=\"wmode\" value=\"transparent\"></param><param name=\"allowFullScreen\" value=\"true\"></param><embed src=\"http://www.youtube.com/v/FavWH5RhYpw&amp;rel=0&amp;egm=0&amp;showinfo=0&amp;fs=1\" type=\"application/x-shockwave-flash\" width=\"400\" height=\"325\" allowFullScreen=\"true\" wmode=\"transparent\"></embed></object>", posts[0].video_player
+    assert_equal "<iframe width=\"400\" height=\"300\" src=\"http://www.youtube.com/embed/FavWH5RhYpw?wmode=transparent&autohide=1&egm=0&hd=1&iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&showsearch=0\" frameborder=\"0\" allowfullscreen></iframe>", posts[0].video_player
   end
 
   def test_find_with_tagged
@@ -347,15 +340,11 @@ EOF
 <p><b>ボールドです。</b></p>
 <p><i>イタリックです。</i></p>
 <p><strike>取り消し線です。</strike></p>
-<ul>
-<li>unordered 1</li>
+<ul><li>unordered 1</li>
 <li>unordered 2</li>
-</ul>
-<ol>
-<li>ordered 1</li>
+</ul><ol><li>ordered 1</li>
 <li>ordered 2</li>
-</ol>
-<p>ここからインデント</p>
+</ol><p>ここからインデント</p>
 <blockquote style="margin: 0 0 0 40px; border: none; padding: 0px;">インデント開始<br/>ああああ<br/>インデント終了</blockquote>
 <p>ここまでインデント</p>
 EOF
@@ -406,4 +395,3 @@ EOF
     post = @write_site.save(videos[0])
   end
 end
-
