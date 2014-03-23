@@ -1,3 +1,9 @@
+== 0.8.1 / 2014-03-23
+* new: Answer support. Thanks evotopid.
+* new: use bundler to build
+* fix: test
+
+
 == 0.8.0 / 2011-02-20
 * new: dashboard support.
 * new: active_support 3.0 support.
@@ -8,11 +14,10 @@
 
 
 == 0.7.1 / 2009-09-11
-* fix: missing Site#delete 
+* fix: missing Site#delete
 * fix: the number of the records is wrong when finding with :limit and :offset options.
 
-	
+
 == 0.7.0 / 2009-09-09
 
 * initial release
-
