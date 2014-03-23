@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
+require "tumblr4r/version"
 require 'net/http'
-require 'rubygems'
 require 'rexml/document'
-begin 
-  require 'active_support/core_ext' 
-  require 'active_support/core_ext' 
-rescue 
-  require 'activesupport' 
-end 
+begin
+  require 'active_support/core_ext'
+  require 'active_support/core_ext'
+rescue
+  require 'activesupport'
+end
 
 require 'logger'
 require 'cgi'
 
 module Tumblr4r
-  VERSION = '0.8.1'
   class TumblrError < StandardError
     attr_accessor :attachment
     def initialize(msg, attachment=nil)
@@ -362,10 +361,10 @@ module Tumblr4r
                      "caption" => @video_caption})
     end
   end
-  
+
   class Answer < Post
     attr_accessor :answer, :question
-    
+
     def params
       super.merge!({"question" => @question, "answer" => @answer})
     end
@@ -625,7 +624,7 @@ module Tumblr4r
       post.video_player = rexml_post.elements["video-player"].try(:text) || ""
       post
     end
-    
+
     def answer(post, rexml_post)
       post = self.post(post, rexml_post)
       post.question = rexml_post.elements["question"].try(:text) || ""
